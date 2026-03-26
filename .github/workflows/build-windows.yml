@@ -27,7 +27,7 @@ jobs:
     
     - name: Build EXE with PyInstaller
       run: |
-        python -m PyInstaller --clean --onedir --windowed --name AquaTrade-Pro --collect-all vnpy_ctp --collect-all talib --collect-all akshare --add-data "config_manager.py;." --add-data "factor_engine.py;." --add-data "symbol_scanner.py;." --add-data "factor_panels.py;." --add-data "data_provider.py;." main_gui.py
+        python -m PyInstaller --clean --onedir --windowed --name AquaTrade-Pro --collect-all vnpy_ctp --collect-all talib --collect-all akshare --collect-all numpy --collect-all pandas --hidden-import akshare --hidden-import akshare.stock --hidden-import akshare.futures --add-data "config_manager.py;." --add-data "factor_engine.py;." --add-data "symbol_scanner.py;." --add-data "factor_panels.py;." --add-data "data_provider.py;." main_gui.py
     
     - name: Create ZIP archive
       run: |
