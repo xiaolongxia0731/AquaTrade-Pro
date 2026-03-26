@@ -309,7 +309,18 @@ class ConfigDialog(QDialog):
         modes = ["futures", "stock", "mock"]
         current_mode = modes[self.mode_combo.currentIndex()]
         
-        cfg = {
+        # 先读取现有配置（保留多因子等其他配置）
+        config_path = os.path.join(os.path.dirname(__file__), "config.json")
+        cfg = {}
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    cfg = json.load(f)
+            except:
+                cfg = {}
+        
+        # 更新配置字段
+        cfg.update({
             "CTP_BROKER_ID": self.ctp_broker.text(),
             "CTP_USER_ID": self.ctp_user.text(),
             "CTP_PASSWORD": self.ctp_pass.text(),
@@ -326,11 +337,10 @@ class ConfigDialog(QDialog):
             "MAX_ORDERS_PER_MIN": self.max_orders.value(),
             "DAILY_PROFIT_TARGET": self.daily_profit_target.value(),
             "DAILY_LOSS_LIMIT": self.daily_loss_limit.value(),
-            "TRADING_MODE": current_mode,  # 保存交易模式
-        }
+            "TRADING_MODE": current_mode,
+        })
         
         # 保存到 JSON 文件
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
                 json.dump(cfg, f, indent=2, ensure_ascii=False)
