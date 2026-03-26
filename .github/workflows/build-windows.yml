@@ -3,8 +3,6 @@ name: Build Windows EXE
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -24,22 +22,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller
         pip install -r requirements.txt
+        pip install akshare --upgrade
     
-    - name: Build EXE with PyInstaller
+    - name: Build EXE
       run: |
-        python -m PyInstaller --clean --onedir --windowed --name AquaTrade-Pro --collect-all vnpy_ctp --collect-all talib --add-data "config_manager.py;." --add-data "factor_engine.py;." --add-data "symbol_scanner.py;." --add-data "factor_panels.py;." --add-data "data_provider.py;." main_gui.py
+        python -m PyInstaller --clean --onedir --windowed --name AquaTrade-Pro --collect-all vnpy_ctp --collect-all talib --collect-all akshare --collect-all numpy --collect-all pandas --collect-all matplotlib --add-data "config_manager.py;." --add-data "factor_engine.py;." --add-data "symbol_scanner.py;." --add-data "factor_panels.py;." --add-data "data_provider.py;." main_gui.py
     
-    - name: Copy akshare manually
-      run: |
-        $aksharePath = python -c "import akshare; import os; print(os.path.dirname(akshare.__file__))"
-        Copy-Item -Path $aksharePath -Destination "dist\AquaTrade-Pro\_internal\akshare" -Recurse -Force
-        Write-Host "Copied akshare from $aksharePath"
-    
-    - name: Create ZIP archive
+    - name: Create ZIP
       run: |
         Compress-Archive -Path "dist\AquaTrade-Pro" -DestinationPath "AquaTrade-Pro-Windows.zip"
     
-    - name: Upload artifact
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: AquaTrade-Pro-Windows
