@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -27,7 +27,13 @@ jobs:
     
     - name: Build EXE with PyInstaller
       run: |
-        python -m PyInstaller --clean --onedir --windowed --name AquaTrade-Pro --collect-all vnpy_ctp --collect-all talib --collect-all akshare --collect-all numpy --collect-all pandas --hidden-import akshare --hidden-import akshare.stock --hidden-import akshare.futures --add-data "config_manager.py;." --add-data "factor_engine.py;." --add-data "symbol_scanner.py;." --add-data "factor_panels.py;." --add-data "data_provider.py;." main_gui.py
+        python -m PyInstaller --clean --onedir --windowed --name AquaTrade-Pro --collect-all vnpy_ctp --collect-all talib --add-data "config_manager.py;." --add-data "factor_engine.py;." --add-data "symbol_scanner.py;." --add-data "factor_panels.py;." --add-data "data_provider.py;." main_gui.py
+    
+    - name: Copy akshare manually
+      run: |
+        $aksharePath = python -c "import akshare; import os; print(os.path.dirname(akshare.__file__))"
+        Copy-Item -Path $aksharePath -Destination "dist\AquaTrade-Pro\_internal\akshare" -Recurse -Force
+        Write-Host "Copied akshare from $aksharePath"
     
     - name: Create ZIP archive
       run: |
@@ -38,11 +44,3 @@ jobs:
       with:
         name: AquaTrade-Pro-Windows
         path: AquaTrade-Pro-Windows.zip
-    
-    - name: Create Release
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: AquaTrade-Pro-Windows.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
